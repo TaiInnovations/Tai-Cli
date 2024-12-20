@@ -8,17 +8,17 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"runtime"
 	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/fatih/color"
 )
 
 // 可用模型列表
 var availableModels = []string{
-	"google/gemini-2.0-flash-exp:free",  // 默认模型
+	"google/gemini-2.0-flash-exp:free", // 默认模型
 	"google/gemini-exp-1206:free",
 	"google/gemini-exp-1121:free",
 	"google/learnlm-1.5-pro-experimental:free",
@@ -96,7 +96,7 @@ func validateAPIKey(apiKey string) bool {
 
 func chatWithModel(messages []Message, apiKey string, model string) (*http.Response, error) {
 	url := "https://openrouter.ai/api/v1/chat/completions"
-	
+
 	chatReq := ChatRequest{
 		Model:    model,
 		Messages: messages,
@@ -124,7 +124,7 @@ func showModels() {
 	yellow := color.New(color.FgYellow).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
 	fmt.Printf("\n%s\n", yellow("可用模型列表："))
-	
+
 	for i, model := range availableModels {
 		if model == currentModel {
 			fmt.Printf("%d. %s (当前使用)\n", i+1, green(model))
@@ -137,7 +137,7 @@ func showModels() {
 func main() {
 	// 确保控制台输出使用 UTF-8 编码
 	os.Stdout.WriteString("\xEF\xBB\xBF") // 添加 UTF-8 BOM
-	
+
 	currentModel = availableModels[0]
 	var messages []Message
 
@@ -146,6 +146,7 @@ func main() {
 	red := color.New(color.FgRed)
 
 	blue.Println("\n欢迎使用 AI 聊天!")
+	green.Printf("当前使用的模型: %s\n", currentModel)
 	fmt.Println("\n命令提示：")
 	fmt.Println("• 输入 'quit' 或 'exit' 结束对话")
 	fmt.Println("• 输入 'new' 或 'clear' 开启新会话")
@@ -166,7 +167,7 @@ func main() {
 		if !scanner.Scan() {
 			break
 		}
-		
+
 		userInput := scanner.Text()
 
 		// 处理命令
@@ -254,7 +255,7 @@ func main() {
 
 		if resp.StatusCode == http.StatusOK {
 			blue.Print("\nAI: ")
-			
+
 			reader := bufio.NewReader(resp.Body)
 			aiResponse := ""
 
