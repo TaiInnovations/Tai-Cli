@@ -12,13 +12,6 @@ else
   echo "Installing..."
 fi
 
-for url0 in ${URLS[@]}; do
-  if curl -Is --connect-timeout 4 "$url0" | grep -q "HTTP/1.1 404"; then
-    url=$url0
-    break
-  fi
-done
-
 os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
 if [[ $os_name == *"mingw"* ]]; then
   os_name="windows"
@@ -58,8 +51,7 @@ fi
 
 # 如果是mac或者linux系统
 if [[ $os_name == "darwin" || $os_name == "linux" ]]; then
-  # 打印下载地址
-  echo "下载地址/Download URL: ${url}free-gemini_${os_name}_${hw_name}"
+  # 删除了打印下载地址的echo语句
   if [ "$lc_type" = "zh" ]; then
     echo "请输入开机密码"
   else
@@ -82,8 +74,7 @@ if [[ $os_name == "darwin" || $os_name == "linux" ]]; then
 fi;
 # 如果是windows系统
 if [[ $os_name == "windows" ]]; then
-  # 打印下载地址
-  echo "下载地址/Download URL: ${url}free-gemini_${os_name}_${hw_name}.exe"
+  # 删除了打印下载地址的echo语句
   # 停掉正在运行free-gemini
   taskkill -f -im free-gemini.exe || true
   # 安装
