@@ -1,4 +1,4 @@
 # free-gemini
 
 # build
-`goreleaser build --snapshot --clean`
+`./build.sh`
