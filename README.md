@@ -1,4 +1,4 @@
-# Free Gemini
+# Tai
 
 使用 OpenRouter 和 Google AI Studio 免费访问 Gemini API 的简单工具。
 
