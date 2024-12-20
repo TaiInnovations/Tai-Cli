@@ -1,4 +1,4 @@
-module free-gemini
+module Tai
 
 go 1.23.4
 
