@@ -25,7 +25,10 @@ bash <(curl -Lk https://github.com/tasselx/free-gemini/releases/download/latest/
 
 3. **运行构建**
 ```bash
-./build.sh
+# 全平台
+make
+# 指定平台
+make windows_amd64 linux_amd64
 ```
 
 ## 注意事项
