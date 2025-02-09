@@ -1,6 +1,6 @@
 # Tai
 
-A simple tool to access Gemini API for free using OpenRouter and Google AI Studio.
+A simple tool to access Gemini / DeepSeek API for free using OpenRouter and Google AI Studio / DeepSeek.
 
 [中文文档](README.zh-CN.md)
 
@@ -19,13 +19,17 @@ bash <(curl -Lk https://github.com/tasselx/free-gemini/releases/download/latest/
    - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
    - Create and copy API Key
 
-2. **Configure OpenRouter**
+2. **Get DeepSeek API Key**
+   - Visit [DeepSeek](https://platform.deepseek.com/api_keys)
+   - Create and copy API Key
+
+3. **Configure OpenRouter**
    - Go to [OpenRouter Integration](https://openrouter.ai/settings/integrations)
-   - Enter your Google AI Studio API Key
+   - Enter your Google AI Studio / DeepSeek API Key
    - Visit [OpenRouter Keys](https://openrouter.ai/settings/keys)
    - Create and get OpenRouter API Key
 
-3. **Build**
+4. **Build**
 ```bash
 # All platforms
 make
