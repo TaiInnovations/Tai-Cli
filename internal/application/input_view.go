@@ -36,6 +36,9 @@ func initInputView() {
         var conversation *dao.Conversation
         userMessage := strings.Trim(inputView.GetText(), "\t\n\r")
         if event.Key() == tcell.KeyCtrlJ {
+            inputView.SetText(inputView.GetText()+"\n", true)
+            return nil
+        } else if event.Key() == tcell.KeyEnter {
             if len(userMessage) == 0 {
                 return nil
             }
@@ -46,13 +49,15 @@ func initInputView() {
                 systemMessage := ""
                 switch directive {
                 case "help", "helps":
-                    systemMessage += "/help: Show command usages\n" +
+                    systemMessage += "/help: Show command usages.\n" +
                         "/setting or F2: Go to setting window.\n" +
                         "/new <name>: Create a new session.\n" +
                         "/rename <new name>: Rename the current session.\n" +
                         "/delete: Delete current session.\n" +
                         "F1: Go to chat window.\n" +
-                        "/exit or /quit: Exit the application"
+                        "Ctrl+J: New line.\n" +
+                        "Ctrl+Enter: New line. (Unsupported on certain operating system.)\n" +
+                        "/exit or /quit: Exit the application."
                 case "setting", "settings":
                     tviewPages.SwitchToPage("setting")
                 case "new":
@@ -99,8 +104,9 @@ func initInputView() {
                 conversation = dao.InsertConversation(conversation.SessionId, dao.RoleAI, conversation.Message)
                 sessions[activeSessionIndex].ConversationList = append(sessions[activeSessionIndex].ConversationList, conversation)
             }
+            chatView.ScrollToEnd()
+            return nil
         }
-        chatView.ScrollToEnd()
         return event
     })
 }
@@ -149,6 +155,11 @@ func chatWithModel() *dao.Conversation {
         if err == nil {
             apiKey = string(decodedStr)
         }
+    }
+
+    if len(apiKey) <= 0 {
+        appendChatResponseMessage(red.Sprintln("\nError: Api key is required. Please go to the setting window to set the api key."), conversation)
+        return conversation
     }
 
     req.Header.Set("Content-Type", "application/json")
