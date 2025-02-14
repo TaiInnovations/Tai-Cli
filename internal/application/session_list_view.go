@@ -29,14 +29,6 @@ func initSessionList() {
     for _, sessionDao := range sessionDaos {
         insertSession(&sessionDao)
     }
-    //sessionListView.SetMouseCapture(func(action tview.MouseAction, event *tcell.EventMouse) (tview.MouseAction, *tcell.EventMouse) {
-    //    if action == tview.MouseScrollUp {
-    //        sessionListView.SetCurrentItem((sessionListView.GetCurrentItem() - 1) % sessionListView.GetItemCount())
-    //    } else if action == tview.MouseScrollDown {
-    //        sessionListView.SetCurrentItem((sessionListView.GetCurrentItem() + 1) % sessionListView.GetItemCount())
-    //    }
-    //    return action, event
-    //})
 }
 
 func insertSession(sessionDao *dao.Session) {
@@ -64,11 +56,13 @@ func deleteSession(index int) {
     db.Delete(&dao.Conversation{}, "session_id = ?", sessions[index].Id)
     sessions = append(sessions[:index], sessions[index+1:]...)
     sessionListView.RemoveItem(index)
-    activeSessionIndex = 0
-    if index > 0 {
-        activeSessionIndex = index - 1
+    if index == activeSessionIndex {
+        activeSessionIndex = 0
+        if index > 0 {
+            activeSessionIndex = index - 1
+        }
+        sessionListView.SetCurrentItem(activeSessionIndex)
     }
-    sessionListView.SetCurrentItem(activeSessionIndex)
 }
 
 func changeSessionName(index int, newName string) {

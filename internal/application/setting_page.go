@@ -72,11 +72,11 @@ func initSettingPage() *tview.Flex {
     saveBtn.SetSelectedFunc(func() {
         for _, serviceProvider := range serviceProviderList {
             apiKey := form.GetFormItemByLabel(fmt.Sprintf("%s API Key", serviceProvider.Name)).(*tview.InputField).GetText()
-            serviceProvider.ApiKey = apiKey
             if len(apiKey) > 0 {
                 serviceProvider.ApiKey = base64.StdEncoding.EncodeToString([]byte(apiKey))
             }
             database.GetDB().Save(serviceProvider)
+            app.serviceProviderList[serviceProvider.Id] = serviceProvider
         }
         option, _ := form.GetFormItemByLabel("Active AI Model").(*tview.DropDown).GetCurrentOption()
         dao.UpdateSetting("active_ai_model_id", string(aiModelList[option].Id))

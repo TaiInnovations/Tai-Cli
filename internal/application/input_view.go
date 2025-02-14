@@ -23,7 +23,7 @@ func initInputView() {
     green := color.New(color.FgGreen, color.Bold)
     magenta := color.New(color.FgMagenta, color.Bold)
     inputView.SetLabel("> ").
-        SetPlaceholder("Press Ctrl+Enter/J to send messages.\nUse \"/help\" to check command usages.").
+        SetPlaceholder("Press Enter to send messages.\nUse \"/help\" to check command usages.").
         SetPlaceholderStyle(tcell.StyleDefault.Foreground(tcell.ColorGray)).
         SetSize(inputViewRows, 0)
     inputView.SetBorder(true).SetBorderPadding(0, 0, 1, 0)
@@ -53,12 +53,12 @@ func initInputView() {
                         "/setting or F2: Go to setting window.\n" +
                         "/new <name>: Create a new session.\n" +
                         "/rename <new name>: Rename the current session.\n" +
-                        "/delete: Delete current session.\n" +
+                        "/delete or /del: Delete current session.\n" +
                         "F1: Go to chat window.\n" +
                         "Ctrl+J: New line.\n" +
                         "Ctrl+Enter: New line. (Unsupported on certain operating system.)\n" +
                         "/exit or /quit: Exit the application."
-                case "setting", "settings":
+                case "setting":
                     tviewPages.SwitchToPage("setting")
                 case "new":
                     sessionName := "New Chat"
@@ -74,11 +74,16 @@ func initInputView() {
                         changeSessionName(activeSessionIndex, sessionName)
                         systemMessage += "Session name changed successfully."
                     }
-                case "delete":
-                    if len(sessions) <= 1 {
-                        systemMessage += "At least one session should be kept."
-                    } else {
+                case "delete", "del":
+                    sessionsCount := len(sessions)
+                    if sessionsCount > 1 {
                         deleteSession(activeSessionIndex)
+                    } else if sessionsCount > 0 {
+                        oldActiveSessionIndex := activeSessionIndex
+                        createSession("New Chat")
+                        deleteSession(oldActiveSessionIndex + 1)
+                    } else {
+                        createSession("New Chat")
                     }
                 case "exit", "quit":
                     tviewApp.Stop()
@@ -100,9 +105,11 @@ func initInputView() {
                 addMessageToChatView(conversation)
                 sessions[activeSessionIndex].ConversationList = append(sessions[activeSessionIndex].ConversationList, conversation)
                 green.Fprintf(chatViewWriter, "AI:\n")
-                conversation = chatWithModel()
-                conversation = dao.InsertConversation(conversation.SessionId, dao.RoleAI, conversation.Message)
-                sessions[activeSessionIndex].ConversationList = append(sessions[activeSessionIndex].ConversationList, conversation)
+                responseConversation, chatResponseErrExist := chatWithModel()
+                if !chatResponseErrExist {
+                    responseConversation = dao.InsertConversation(conversation.SessionId, dao.RoleAI, responseConversation.Message)
+                }
+                sessions[activeSessionIndex].ConversationList = append(sessions[activeSessionIndex].ConversationList, responseConversation)
             }
             chatView.ScrollToEnd()
             return nil
@@ -111,8 +118,9 @@ func initInputView() {
     })
 }
 
-func chatWithModel() *dao.Conversation {
+func chatWithModel() (*dao.Conversation, bool) {
     forceDrawChatView = true
+    chatResponseErrExist := false
     defer func() {
         forceDrawChatView = false
     }()
@@ -141,13 +149,13 @@ func chatWithModel() *dao.Conversation {
     jsonData, err := json.Marshal(chatReq)
     if err != nil {
         appendChatResponseMessage(red.Sprintf(err.Error()), conversation)
-        return conversation
+        return conversation, chatResponseErrExist
     }
 
     req, err := http.NewRequest("POST", serviceProvider.Url, bytes.NewBuffer(jsonData))
     if err != nil {
         appendChatResponseMessage(red.Sprintf(err.Error()), conversation)
-        return conversation
+        return conversation, chatResponseErrExist
     }
     apiKey := ""
     if len(serviceProvider.ApiKey) > 0 {
@@ -159,7 +167,7 @@ func chatWithModel() *dao.Conversation {
 
     if len(apiKey) <= 0 {
         appendChatResponseMessage(red.Sprintln("\nError: Api key is required. Please go to the setting window to set the api key."), conversation)
-        return conversation
+        return conversation, chatResponseErrExist
     }
 
     req.Header.Set("Content-Type", "application/json")
@@ -169,7 +177,7 @@ func chatWithModel() *dao.Conversation {
     resp, err := client.Do(req)
     if err != nil {
         appendChatResponseMessage(red.Sprintf("\nError: %v\n", err), conversation)
-        return conversation
+        return conversation, chatResponseErrExist
     }
     defer resp.Body.Close()
 
@@ -209,6 +217,7 @@ func chatWithModel() *dao.Conversation {
             var chatResp domain.ChatResponse
             if err := json.Unmarshal([]byte(line), &chatResp); err != nil {
                 appendChatResponseMessage(red.Sprintf("Error parsing JSON: %v\n", err), conversation)
+                chatResponseErrExist = true
                 continue
             }
 
@@ -222,10 +231,11 @@ func chatWithModel() *dao.Conversation {
         }
     } else {
         appendChatResponseMessage(red.Sprintf("Error: No response. (status code: %d, error message)\n", resp.StatusCode), conversation)
+        chatResponseErrExist = true
     }
     appendChatResponseMessage("\n", conversation)
     conversation.Message += red.Sprintln()
-    return conversation
+    return conversation, chatResponseErrExist
 }
 
 func appendChatResponseMessage(message string, conversation *dao.Conversation) {
