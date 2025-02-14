@@ -8,7 +8,7 @@
 
 通过 GitHub 安装脚本一键安装：
 ```bash
-bash <(curl -Lk https://github.com/tasselx/free-gemini/releases/download/latest/install.sh)
+bash <(curl -Lk https://github.com/TaiInnovations/Tai-Cli/releases/download/latest/install.sh)
 ```
 
 ### 配置步骤

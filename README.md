@@ -10,7 +10,7 @@ A simple tool to access Gemini / DeepSeek API for free using OpenRouter and Goog
 
 Install via script:
 ```bash
-bash <(curl -Lk https://github.com/tasselx/free-gemini/releases/download/latest/install.sh)
+bash <(curl -Lk https://github.com/TaiInnovations/Tai-Cli/releases/download/latest/install.sh)
 ```
 
 ### Setup
