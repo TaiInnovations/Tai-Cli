@@ -83,6 +83,8 @@ func initSettingPage() *tview.Flex {
         app.SetActiveAiModel(aiModelList[option].Id)
         aiModelCurOption = option
         saveBtn.Blur()
+        tviewPages.SwitchToPage("main")
+        UpdateChatViewTitle()
     })
     backBtn.SetSelectedFunc(func() {
         backBtn.Blur()
