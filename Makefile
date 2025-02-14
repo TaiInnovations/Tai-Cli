@@ -13,7 +13,21 @@ LINUX_386 := $(BUILD_DIR)/Tai_linux_386
 
 # Default target, build all platforms
 .PHONY: all
-all: $(DARWIN_AMD64) $(DARWIN_ARM64) $(WINDOWS_AMD64) $(WINDOWS_ARM64) $(WINDOWS_386) $(LINUX_AMD64) $(LINUX_ARM64) $(LINUX_386)
+all: check_and_clean init $(DARWIN_AMD64) $(DARWIN_ARM64) $(WINDOWS_AMD64) $(WINDOWS_ARM64) $(WINDOWS_386) $(LINUX_AMD64) $(LINUX_ARM64) $(LINUX_386)
+
+# Check if build directory exists and clean if it does
+.PHONY: check_and_clean
+check_and_clean:
+	@if [ -d "$(BUILD_DIR)" ]; then \
+		echo "Cleaning existing build directory..."; \
+		rm -rf $(BUILD_DIR); \
+	fi
+
+# Create build directory
+.PHONY: init
+init:
+	@echo "Creating build directory..."
+	@mkdir -p $(BUILD_DIR)
 
 # Darwin builds
 $(DARWIN_AMD64):
